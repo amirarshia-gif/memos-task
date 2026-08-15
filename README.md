@@ -15,8 +15,6 @@ Cluster: k3s، دو Node (sharifi-ha1 کنترل‌پلین، sharifi-ha2 ورک
 Ingress: Traefik (پیش‌فرض k3s)، فقط HTTP روی پورت ۸۰
 Storage: local-path (StorageClass پیش‌فرض k3s)
 
-Manifestها و کد کامل پروژه
-🔗 [https://github.com/amirarshia-gif/memos-task]
 
 محدودیت‌های شناخته‌شده
 local-path یک Storage مشترک بین Nodeها نیست — دیسک واقعی هر PVC روی همون Nodeای ساخته می‌شه که Pod اول بار اونجا Schedule شده و برای همیشه بهش قفل می‌مونه (nodeAffinity). جابه‌جایی یک Pod به Node دیگه یعنی دسترسی به داده‌ی قبلی از دست می‌ره.
