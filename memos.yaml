@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memos
+  namespace: memos-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memos
+  template:
+    metadata:
+      labels:
+        app: memos
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: memos
+        image: neosmemo/memos:stable
+        ports:
+        - containerPort: 5230
+        envFrom:
+        - configMapRef:
+            name: memos-config
+        - secretRef:
+            name: memos-secret
+        env:
+        - name: MEMOS_PORT
+          value: "5230"
+        - name: MEMOS_DSN
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres.memos-app.svc.cluster.local:5432/$(POSTGRES_DB)?sslmode=disable"
+        volumeMounts:
+        - name: memos-data
+          mountPath: /var/opt/memos
+        readinessProbe:
+          httpGet: { path: /healthz, port: 5230 }
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet: { path: /healthz, port: 5230 }
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          requests: { cpu: "100m", memory: "128Mi" }
+          limits:   { cpu: "300m", memory: "256Mi" }
+      volumes:
+      - name: memos-data
+        persistentVolumeClaim:
+          claimName: memos-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memos
+  namespace: memos-app
+spec:
+  selector:
+    app: memos
+  ports:
+  - port: 5230
+    targetPort: 5230
+
+
